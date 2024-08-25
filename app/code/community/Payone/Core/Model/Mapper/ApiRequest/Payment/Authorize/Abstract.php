@@ -1330,10 +1330,10 @@ abstract class Payone_Core_Model_Mapper_ApiRequest_Payment_Authorize_Abstract
     private function getItemPrice(Mage_Sales_Model_Order_Item $itemData)
     {
         if($this->configPayment->getCurrencyConvert()) {
-            return $itemData->getBasePriceInclTax();
+            return Mage::helper('checkout')->getBasePriceInclTax($itemData) + ($this->isWeeeTaxEnabled() ? Mage::helper('weee')->getBaseWeeeTaxInclTax($itemData) : 0);
         }
 
-        return $itemData->getPriceInclTax();
+        return Mage::helper('checkout')->getPriceInclTax($itemData) + ($this->isWeeeTaxEnabled() ? Mage::helper('weee')->getWeeeTaxInclTax($itemData) : 0);
     }
 
     /**
@@ -1392,5 +1392,11 @@ abstract class Payone_Core_Model_Mapper_ApiRequest_Payment_Authorize_Abstract
         }
 
         return Payone_Api_Enum_KlarnaInvoicingType::KIV;
+    }
+
+    /** @return bool */
+    private function isWeeeTaxEnabled()
+    {
+        return Mage::helper('core')->isModuleEnabled('Mage_Weee') && Mage::helper('weee')->isEnabled();
     }
 }
